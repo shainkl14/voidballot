@@ -1,0 +1,15 @@
+node_modules/
+dist/
+logs/
+midnight-level-db/
+*.log
+.DS_Store
+.env
+.env.*
+web/node_modules/
+web/dist/
+web/public/zk/
+contracts/managed/
+deployment.json
+.yarn-integrity
+*.tsbuildinfo
