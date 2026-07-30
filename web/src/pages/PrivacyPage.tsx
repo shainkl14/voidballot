@@ -4,7 +4,7 @@ import { ShieldCheck, LockKey, Broadcast, Warning } from '@phosphor-icons/react'
 export function PrivacyPage() {
   return (
     <div className="mx-auto max-w-[900px] px-4 py-16 md:px-8 md:py-24">
-      <h1 className="font-display text-4xl font-800 tracking-tight md:text-5xl">
+      <h1 className="font-display text-4xl font-extrabold tracking-tight md:text-5xl">
         Privacy claim
       </h1>
       <p className="mt-5 max-w-[60ch] text-lg leading-relaxed text-mist">
@@ -17,7 +17,7 @@ export function PrivacyPage() {
           <div className="flex items-start gap-4">
             <LockKey size={24} className="mt-1 shrink-0 text-acid" weight="duotone" />
             <div>
-              <h2 className="font-display text-xl font-700">Private</h2>
+              <h2 className="font-display text-xl font-bold">Private</h2>
               <ul className="mt-3 space-y-2 text-mist">
                 <li>Voter secret (local private state / witness)</li>
                 <li>Link between Lace / 1AM wallet and nullifier</li>
@@ -31,7 +31,7 @@ export function PrivacyPage() {
           <div className="flex items-start gap-4">
             <Broadcast size={24} className="mt-1 shrink-0 text-acid" weight="duotone" />
             <div>
-              <h2 className="font-display text-xl font-700">Public</h2>
+              <h2 className="font-display text-xl font-bold">Public</h2>
               <ul className="mt-3 space-y-2 text-mist">
                 <li>Proposal hash</li>
                 <li>Used nullifiers (anti-double-vote set)</li>
@@ -46,7 +46,7 @@ export function PrivacyPage() {
           <div className="flex items-start gap-4">
             <ShieldCheck size={24} className="mt-1 shrink-0 text-acid" weight="duotone" />
             <div>
-              <h2 className="font-display text-xl font-700">Circuits</h2>
+              <h2 className="font-display text-xl font-bold">Circuits</h2>
               <ul className="mt-3 space-y-2 text-mist">
                 <li>
                   <span className="font-mono text-paper">castBallot</span> - spend a nullifier,

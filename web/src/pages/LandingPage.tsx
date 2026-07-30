@@ -39,7 +39,7 @@ export function LandingPage() {
               initial={reduce ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.05 }}
-              className="font-display text-5xl font-800 leading-[1.05] tracking-tight text-paper md:text-6xl lg:text-7xl"
+              className="font-display text-5xl font-extrabold leading-[1.05] tracking-tight text-paper md:text-6xl lg:text-7xl"
             >
               Cast in the void.
               <br />
@@ -84,9 +84,9 @@ export function LandingPage() {
           >
             <div className="aspect-[4/5] w-full overflow-hidden border border-line bg-ink">
               <img
-                src="https://picsum.photos/seed/voidballot-chamber-void/900/1120"
-                alt="Dim civic chamber corridor with hard light"
-                className="h-full w-full object-cover opacity-80"
+                src="/chamber.jpg"
+                alt="Dim civic chamber corridor with acid-lime light cuts"
+                className="h-full w-full object-cover opacity-90"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-void via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -104,7 +104,7 @@ export function LandingPage() {
 
       <section className="border-b border-line py-24 md:py-32">
         <div className="mx-auto max-w-[1400px] px-4 md:px-8">
-          <h2 className="font-display text-3xl font-800 tracking-tight md:text-5xl">
+          <h2 className="font-display text-3xl font-extrabold tracking-tight md:text-5xl">
             Three signals. One chamber.
           </h2>
           <div className="mt-14 grid grid-cols-1 gap-px bg-line md:grid-cols-3">
@@ -134,7 +134,7 @@ export function LandingPage() {
                 className="bg-void p-8 md:p-10"
               >
                 <item.icon size={28} weight="duotone" className="text-acid" />
-                <h3 className="mt-6 font-display text-xl font-700">{item.title}</h3>
+                <h3 className="mt-6 font-display text-xl font-bold">{item.title}</h3>
                 <p className="mt-3 max-w-[36ch] text-sm leading-relaxed text-mist">{item.body}</p>
               </motion.div>
             ))}
@@ -144,7 +144,7 @@ export function LandingPage() {
 
       <section className="overflow-hidden border-b border-line bg-ink py-20">
         <motion.div
-          className="flex whitespace-nowrap font-display text-5xl font-800 tracking-tight text-paper/15 md:text-7xl"
+          className="flex whitespace-nowrap font-display text-5xl font-extrabold tracking-tight text-paper/15 md:text-7xl"
           animate={reduce ? undefined : { x: ['0%', '-50%'] }}
           transition={
             reduce
@@ -160,7 +160,7 @@ export function LandingPage() {
       <section className="py-24 md:py-32">
         <div className="mx-auto grid max-w-[1400px] grid-cols-1 items-end gap-12 px-4 md:grid-cols-2 md:px-8">
           <div>
-            <h2 className="font-display text-3xl font-800 tracking-tight md:text-4xl">
+            <h2 className="font-display text-3xl font-extrabold tracking-tight md:text-4xl">
               Built for local Midnight undeployed.
             </h2>
             <p className="mt-4 max-w-[48ch] text-mist leading-relaxed">

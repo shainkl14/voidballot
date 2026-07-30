@@ -23,7 +23,7 @@ function Bar({
   return (
     <div>
       <div className="mb-2 flex items-baseline justify-between">
-        <span className="font-display text-lg font-700">{label}</span>
+        <span className="font-display text-lg font-bold">{label}</span>
         <span className="font-mono text-sm text-mist">
           {value} <span className="text-paper/50">({pct}%)</span>
         </span>
@@ -48,7 +48,7 @@ export function TallyPage({ contractAddress, chamber, onRefresh }: Props) {
     <div className="mx-auto max-w-[900px] px-4 py-12 md:px-8 md:py-16">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-800 tracking-tight">Tally board</h1>
+          <h1 className="font-display text-4xl font-extrabold tracking-tight">Tally board</h1>
           <p className="mt-3 text-mist">Public counters. No voter names.</p>
         </div>
         <button
@@ -85,7 +85,7 @@ export function TallyPage({ contractAddress, chamber, onRefresh }: Props) {
                 <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-mist">
                   {item.label}
                 </p>
-                <p className="mt-2 font-display text-4xl font-800 text-acid">{item.value}</p>
+                <p className="mt-2 font-display text-4xl font-extrabold text-acid">{item.value}</p>
               </div>
             ))}
           </div>

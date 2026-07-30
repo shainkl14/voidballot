@@ -30,7 +30,7 @@ export function SiteNav({
   return (
     <header className="sticky top-0 z-40 border-b border-line/80 bg-void/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-4 px-4 md:px-8">
-        <NavLink to="/" className="font-display text-lg font-800 tracking-tight text-paper">
+        <NavLink to="/" className="font-display text-lg font-extrabold tracking-tight text-paper">
           Void<span className="text-acid">Ballot</span>
         </NavLink>
 

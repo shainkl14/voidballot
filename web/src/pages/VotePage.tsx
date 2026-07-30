@@ -119,7 +119,7 @@ export function VotePage({
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-12 md:px-8 md:py-16">
-      <h1 className="font-display text-4xl font-800 tracking-tight">Ballot desk</h1>
+      <h1 className="font-display text-4xl font-extrabold tracking-tight">Ballot desk</h1>
       <p className="mt-3 max-w-[55ch] text-mist">
         Deploy a local chamber or join an existing address, then cast once from your nullifier.
       </p>
@@ -132,7 +132,7 @@ export function VotePage({
 
       <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <section className="border border-line bg-ink p-6 md:p-8">
-          <h2 className="font-display text-xl font-700">Deploy / join</h2>
+          <h2 className="font-display text-xl font-bold">Deploy / join</h2>
           <label className="mt-6 block">
             <span className="mb-2 block text-sm text-mist">Proposal text</span>
             <textarea
@@ -179,7 +179,7 @@ export function VotePage({
         </section>
 
         <section className="border border-line bg-ink p-6 md:p-8">
-          <h2 className="font-display text-xl font-700">Cast ballot</h2>
+          <h2 className="font-display text-xl font-bold">Cast ballot</h2>
           <p className="mt-2 font-mono text-[11px] text-mist">
             Nullifier preview: {nullifierPreview.slice(0, 18)}…
           </p>
