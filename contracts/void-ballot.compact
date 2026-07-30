@@ -1,0 +1,66 @@
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+/**
+ * VoidBallot — anonymous chamber voting on Midnight.
+ *
+ * Private witness: voterSecret (derives a one-way nullifier)
+ * Public inputs: ballot choice (0=aye, 1=nay, 2=void)
+ * Public ledger: nullifiers, aggregate tallies, proposal hash, seal flag
+ *
+ * An observer can verify tallies and see that a nullifier voted.
+ * They cannot recover which Lace / 1AM wallet owns that nullifier.
+ */
+
+export ledger proposalHash: Bytes<32>;
+export ledger chamberSealed: Uint<8>;
+export ledger votesAye: Counter;
+export ledger votesNay: Counter;
+export ledger votesVoid: Counter;
+export ledger totalBallots: Counter;
+export ledger usedNullifiers: Set<Bytes<32>>;
+
+witness voterSecret(): Bytes<32>;
+
+export circuit voterNullifier(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "vb:nullifier:"), sk]);
+}
+
+constructor(proposal: Bytes<32>) {
+  proposalHash = disclose(proposal);
+  chamberSealed = 0;
+}
+
+export circuit castBallot(choice: Uint<8>): [] {
+  assert(chamberSealed == 0, "chamber sealed");
+
+  const publicChoice = disclose(choice);
+  assert(publicChoice <= (2 as Uint<8>), "invalid ballot choice");
+
+  const sk = voterSecret();
+  const nullifier = voterNullifier(sk);
+  assert(!usedNullifiers.member(disclose(nullifier)), "already voted");
+
+  usedNullifiers.insert(disclose(nullifier));
+  totalBallots.increment(1);
+
+  if (publicChoice == (0 as Uint<8>)) {
+    votesAye.increment(1);
+  } else if (publicChoice == (1 as Uint<8>)) {
+    votesNay.increment(1);
+  } else {
+    votesVoid.increment(1);
+  }
+}
+
+export circuit proveVoted(): [] {
+  const sk = voterSecret();
+  const nullifier = voterNullifier(sk);
+  assert(usedNullifiers.member(disclose(nullifier)), "no ballot cast");
+}
+
+export circuit sealChamber(): [] {
+  assert(chamberSealed == 0, "already sealed");
+  chamberSealed = disclose(1 as Uint<8>);
+}
