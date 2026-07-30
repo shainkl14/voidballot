@@ -152,8 +152,8 @@ export function LandingPage() {
               : { duration: 28, ease: 'linear', repeat: Infinity }
           }
         >
-          <span className="px-8">AYE / NAY / VOID / NULLIFIER / TALLY / SEAL / </span>
-          <span className="px-8">AYE / NAY / VOID / NULLIFIER / TALLY / SEAL / </span>
+          <span className="px-8">AYE / NAY / VOID / NULLIFIER / TALLY / PROVE / </span>
+          <span className="px-8">AYE / NAY / VOID / NULLIFIER / TALLY / PROVE / </span>
         </motion.div>
       </section>
 

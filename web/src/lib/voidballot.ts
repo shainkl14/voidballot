@@ -31,7 +31,6 @@ export const CHOICE_LABELS: Record<BallotChoice, string> = {
 
 export type ChamberState = {
   proposalHash: string;
-  chamberSealed: boolean;
   votesAye: number;
   votesNay: number;
   votesVoid: number;
@@ -131,28 +130,11 @@ export async function proveVoted(
   });
 }
 
-export async function sealChamber(
-  session: ConnectedSession,
-  contractAddress: string,
-) {
-  await session.providers.privateStateProvider.setContractAddress(contractAddress);
-  const secrets = getOrCreateSecrets();
-  await session.providers.privateStateProvider.set(PRIVATE_STATE_ID, secrets);
-  await (submitCallTxAsync as any)(session.providers, {
-    compiledContract: makeCompiledContract(),
-    contractAddress,
-    circuitId: 'sealChamber',
-    args: [],
-    privateStateId: PRIVATE_STATE_ID,
-  });
-}
-
 export function decodeChamberState(stateHex: string): ChamberState {
   const contractState = ContractState.deserialize(fromHex(stateHex));
   const l = ledger(contractState.data);
   return {
     proposalHash: toHex(l.proposalHash),
-    chamberSealed: Number(l.chamberSealed) === 1,
     votesAye: Number(l.votesAye as unknown as bigint),
     votesNay: Number(l.votesNay as unknown as bigint),
     votesVoid: Number(l.votesVoid as unknown as bigint),

@@ -8,8 +8,7 @@ import { type NetworkConfig } from './config.js';
 
 export type VoidBallotCircuits =
   | 'castBallot'
-  | 'proveVoted'
-  | 'sealChamber';
+  | 'proveVoted';
 
 export type VoidBallotProviders = MidnightProviders<VoidBallotCircuits>;
 

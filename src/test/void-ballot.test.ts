@@ -105,7 +105,6 @@ describe('VoidBallot Contract', () => {
     expect(contractAddress.length).toBeGreaterThan(0);
 
     const state = await queryLedger(aliceProviders);
-    expect(state.chamberSealed).toEqual(0n);
     expect(state.totalBallots).toEqual(0n);
     expect(state.proposalHash).toEqual(new Uint8Array(PROPOSAL));
   });
@@ -150,18 +149,5 @@ describe('VoidBallot Contract', () => {
         args: [1n],
       }),
     ).rejects.toThrow();
-  });
-
-  it('seals the chamber', async () => {
-    await (submitCallTx as any)(aliceProviders, {
-      compiledContract: CompiledVoidBallotContract,
-      contractAddress,
-      privateStateId: ALICE_PRIVATE_STATE_ID,
-      circuitId: 'sealChamber',
-      args: [],
-    });
-
-    const state = await queryLedger(aliceProviders);
-    expect(state.chamberSealed).toEqual(1n);
   });
 });

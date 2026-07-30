@@ -102,10 +102,6 @@ export function TallyPage({ contractAddress, chamber, onRefresh }: Props) {
               <dd className="break-all">{chamber.proposalHash}</dd>
             </div>
             <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
-              <dt className="shrink-0 text-paper/70">Chamber</dt>
-              <dd>{chamber.chamberSealed ? 'Sealed' : 'Open for ballots'}</dd>
-            </div>
-            <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
               <dt className="shrink-0 text-paper/70">Contract</dt>
               <dd className="break-all">{contractAddress}</dd>
             </div>

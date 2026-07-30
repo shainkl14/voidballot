@@ -36,7 +36,6 @@ export function PrivacyPage() {
                 <li>Proposal hash</li>
                 <li>Used nullifiers (anti-double-vote set)</li>
                 <li>Aggregate Aye / Nay / Void counters and total ballots</li>
-                <li>Chamber sealed flag</li>
               </ul>
             </div>
           </div>
@@ -55,9 +54,6 @@ export function PrivacyPage() {
                 <li>
                   <span className="font-mono text-paper">proveVoted</span> - prove your nullifier is
                   in the set without naming your wallet
-                </li>
-                <li>
-                  <span className="font-mono text-paper">sealChamber</span> - freeze further ballots
                 </li>
               </ul>
             </div>

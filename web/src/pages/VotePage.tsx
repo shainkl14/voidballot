@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CircleNotch, CheckCircle, Seal } from '@phosphor-icons/react';
+import { CircleNotch, CheckCircle } from '@phosphor-icons/react';
 import type { ConnectedSession } from '../lib/midnight';
 import {
   CHOICE_LABELS,
@@ -8,7 +8,6 @@ import {
   getNullifierPreview,
   getOrCreateSecrets,
   proveVoted,
-  sealChamber,
   type BallotChoice,
   type ChamberState,
 } from '../lib/voidballot';
@@ -95,20 +94,6 @@ export function VotePage({
     onError(null);
     try {
       await proveVoted(session, contractAddress);
-      await onRefresh();
-    } catch (e) {
-      onError(String(e));
-    } finally {
-      onBusy(false);
-    }
-  }
-
-  async function handleSeal() {
-    if (!session || !contractAddress) return;
-    onBusy(true);
-    onError(null);
-    try {
-      await sealChamber(session, contractAddress);
       await onRefresh();
     } catch (e) {
       onError(String(e));
@@ -204,7 +189,7 @@ export function VotePage({
           <div className="mt-6 flex flex-wrap gap-2">
             <button
               type="button"
-              disabled={busy || !session || !contractAddress || chamber?.chamberSealed}
+              disabled={busy || !session || !contractAddress}
               onClick={() => void handleCast()}
               className="inline-flex items-center gap-2 bg-acid px-4 py-2.5 text-sm font-bold text-void disabled:opacity-50 active:scale-[0.98]"
             >
@@ -219,24 +204,13 @@ export function VotePage({
               <CheckCircle size={16} />
               Prove voted
             </button>
-            <button
-              type="button"
-              disabled={busy || !session || !contractAddress || chamber?.chamberSealed}
-              onClick={() => void handleSeal()}
-              className="inline-flex items-center gap-2 border border-ember/60 px-4 py-2.5 text-sm font-medium text-ember disabled:opacity-50 active:scale-[0.98]"
-            >
-              <Seal size={16} />
-              Seal chamber
-            </button>
           </div>
 
           {chamber && (
             <dl className="mt-8 grid grid-cols-2 gap-4 border-t border-line pt-6 font-mono text-sm">
               <div>
-                <dt className="text-mist">Status</dt>
-                <dd className="mt-1 text-paper">
-                  {chamber.chamberSealed ? 'Sealed' : 'Open'}
-                </dd>
+                <dt className="text-mist">Aye</dt>
+                <dd className="mt-1 text-paper">{chamber.votesAye}</dd>
               </div>
               <div>
                 <dt className="text-mist">Total</dt>

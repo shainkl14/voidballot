@@ -7,14 +7,13 @@ import CompactStandardLibrary;
  *
  * Private witness: voterSecret (derives a one-way nullifier)
  * Public inputs: ballot choice (0=aye, 1=nay, 2=void)
- * Public ledger: nullifiers, aggregate tallies, proposal hash, seal flag
+ * Public ledger: nullifiers, aggregate tallies, proposal hash
  *
  * An observer can verify tallies and see that a nullifier voted.
  * They cannot recover which Lace / 1AM wallet owns that nullifier.
  */
 
 export ledger proposalHash: Bytes<32>;
-export ledger chamberSealed: Uint<8>;
 export ledger votesAye: Counter;
 export ledger votesNay: Counter;
 export ledger votesVoid: Counter;
@@ -29,12 +28,9 @@ export circuit voterNullifier(sk: Bytes<32>): Bytes<32> {
 
 constructor(proposal: Bytes<32>) {
   proposalHash = disclose(proposal);
-  chamberSealed = 0;
 }
 
 export circuit castBallot(choice: Uint<8>): [] {
-  assert(chamberSealed == 0, "chamber sealed");
-
   const publicChoice = disclose(choice);
   assert(publicChoice <= (2 as Uint<8>), "invalid ballot choice");
 
@@ -58,9 +54,4 @@ export circuit proveVoted(): [] {
   const sk = voterSecret();
   const nullifier = voterNullifier(sk);
   assert(usedNullifiers.member(disclose(nullifier)), "no ballot cast");
-}
-
-export circuit sealChamber(): [] {
-  assert(chamberSealed == 0, "already sealed");
-  chamberSealed = disclose(1 as Uint<8>);
 }

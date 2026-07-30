@@ -11,7 +11,6 @@ Anonymous chamber voting on [Midnight Network](https://midnight.network). Voters
 | Nullifier set | **Public** (prevents double voting) |
 | Proposal hash | **Public** |
 | Aye / Nay / Void counters | **Public** |
-| Chamber sealed flag | **Public** |
 
 **Observable privacy:** an observer can verify tallies and see that a nullifier voted. They cannot recover which Lace or 1AM wallet owns that nullifier from chain data alone.
 
@@ -21,7 +20,6 @@ Compact requires disclosed choice when branching into public counters, so per-tr
 
 - `castBallot(choice)` - spend nullifier, increment public tally
 - `proveVoted()` - prove your nullifier is in the set
-- `sealChamber()` - freeze further ballots
 
 ## Prerequisites
 
@@ -58,6 +56,10 @@ yarn deploy:undeployed
 
 Uses the pre-funded genesis wallet. Address is written to `deployment.json`.
 
+Current undeployed address:
+
+`462b8dfdb0fe64c1a5d27439e4633127aebdecebd122890ae53922c69e488199`
+
 ## Web UI
 
 ```bash
@@ -88,23 +90,8 @@ yarn web:build
 
 Skipped for this milestone. Use undeployed local only.
 
-## Known local blocker
-
-Full `yarn compile` (ZK keygen) fetches `bls_midnight_2p6` from Midnight's S3 bucket into `~/.cache/midnight/zk-params/`. If that host is unreachable, use:
-
-```bash
-yarn compile:fast   # TypeScript + ZKIR without prover keys
-```
-
-Then, once S3 is reachable:
-
-```bash
-# ensure param file exists
-ls ~/.cache/midnight/zk-params/bls_midnight_2p6
-yarn compile
-yarn sync:zk
-yarn test:local
-yarn deploy:undeployed
-```
+## Known local note
 
 `yarn env:up` may fail if ports 9944/8088/6300 are already taken by another Midnight project; reuse that shared undeployed stack.
+
+Full ZK compile needs Midnight BLS params under `~/.cache/midnight/zk-params/`. This project targets circuits that fit cached param sizes already present on typical L2 workstations (`2p13`+). If keygen fails fetching a missing `bls_midnight_2p*`, run `yarn compile:fast` first, restore network access to Midnight S3, then `yarn compile && yarn sync:zk`.
