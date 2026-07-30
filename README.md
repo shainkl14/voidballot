@@ -87,3 +87,24 @@ yarn web:build
 ## Preprod
 
 Skipped for this milestone. Use undeployed local only.
+
+## Known local blocker
+
+Full `yarn compile` (ZK keygen) fetches `bls_midnight_2p6` from Midnight's S3 bucket into `~/.cache/midnight/zk-params/`. If that host is unreachable, use:
+
+```bash
+yarn compile:fast   # TypeScript + ZKIR without prover keys
+```
+
+Then, once S3 is reachable:
+
+```bash
+# ensure param file exists
+ls ~/.cache/midnight/zk-params/bls_midnight_2p6
+yarn compile
+yarn sync:zk
+yarn test:local
+yarn deploy:undeployed
+```
+
+`yarn env:up` may fail if ports 9944/8088/6300 are already taken by another Midnight project; reuse that shared undeployed stack.
