@@ -65,6 +65,8 @@ Done in 50.55s.
 
 Full dump: [`docs/screenshots/test-passing.txt`](docs/screenshots/test-passing.txt).
 
+CI/CD: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — compile + local stack + `yarn test:local` on every push and pull request.
+
 ## Privacy claim
 
 | Data | Visibility |
