@@ -2,7 +2,8 @@
 
 Anonymous chamber voting on [Midnight Network](https://midnight.network). Voters cast ballots behind a one-way nullifier. Aggregate Aye / Nay / Void tallies stay public and auditable — wallet identity does not.
 
-**Live dApp (Preview):** [https://voidballot.vercel.app](https://voidballot.vercel.app)
+**Live dApp (Preview):** [https://voidballot.vercel.app](https://voidballot.vercel.app)  
+**Live demo video:** [Watch on YouTube](https://youtu.be/VefcaRp52KU)
 
 | Level | Codename | Status |
 |-------|----------|--------|
@@ -30,6 +31,7 @@ Anonymous chamber voting on [Midnight Network](https://midnight.network). Voters
 |-------|--------|
 | Network | `preview` |
 | Frontend | [voidballot.vercel.app](https://voidballot.vercel.app) |
+| Demo video | [YouTube](https://youtu.be/VefcaRp52KU) |
 | Contract address | `487486690e45ea44a5f75fc25b7c01f3d155977638a2556c37a667430fb9477a` |
 | Indexer | `https://indexer.preview.midnight.network/api/v4/graphql` |
 | ZK assets | `/zk/void-ballot` |
