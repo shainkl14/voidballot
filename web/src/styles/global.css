@@ -31,6 +31,16 @@ html {
   scroll-behavior: smooth;
 }
 
+html.compact .py-12 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+html.compact .md\:py-16 {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
 body {
   margin: 0;
   min-height: 100dvh;
@@ -64,6 +74,49 @@ button {
   font-family: inherit;
 }
 
+/* Hero grid — slow breathe */
+@keyframes grid-breathe {
+  0%,
+  100% {
+    opacity: 0.1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.18;
+    transform: scale(1.02);
+  }
+}
+
+.anim-grid-breathe {
+  animation: grid-breathe 10s ease-in-out infinite;
+  transform-origin: 70% 30%;
+}
+
+/* Tally bars — grow from left (paired with motion scaleX) */
+.anim-tally-grow {
+  transform-origin: left center;
+}
+
+/* Seal stamp on TxFlow success */
+@keyframes seal-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.35) rotate(-8deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.94) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.anim-seal-stamp {
+  animation: seal-stamp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -72,5 +125,10 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .anim-grid-breathe,
+  .anim-seal-stamp {
+    animation: none !important;
   }
 }
