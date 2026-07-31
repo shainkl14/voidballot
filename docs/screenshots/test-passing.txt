@@ -1,0 +1,21 @@
+fahmin@Defiance15:~/midnight/voidballot$ yarn test:local
+yarn run v1.22.22
+$ MIDNIGHT_NETWORK=undeployed yarn test
+$ NODE_OPTIONS='--experimental-vm-modules' vitest run
+
+ RUN  v3.2.4 /home/fahmin/midnight/voidballot
+
+ ✓ src/test/void-ballot.test.ts (4)
+   ✓ VoidBallot Contract (4)
+     ✓ deploys the chamber with a proposal hash
+     ✓ casts an anonymous aye ballot and updates public tally
+     ✓ proves the voter cast a ballot without revealing wallet identity
+     ✓ rejects a second ballot from the same nullifier
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  03:14:02
+   Duration  49.73s (transform 391ms, setup 0ms, collect 1.79s, tests 47.41s, environment 0ms, prepare 88ms)
+
+Done in 50.55s.
+fahmin@Defiance15:~/midnight/voidballot$
