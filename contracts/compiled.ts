@@ -1,19 +1,14 @@
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
 import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-js';
 import { witnesses } from './witnesses.js';
 import { Contract } from './managed/void-ballot/contract/index.js';
 
-const currentDir = path.dirname(fileURLToPath(import.meta.url));
-export const zkConfigPath = path.resolve(currentDir, 'managed', 'void-ballot');
-
-/** Node CLI / deploy — absolute asset path for NodeZkConfigProvider. */
+/** Browser — relative asset path resolved by FetchZkConfigProvider. */
 export const CompiledVoidBallotContract = CompiledContract.make(
   'VoidBallotContract',
   Contract,
 ).pipe(
   CompiledContract.withWitnesses(witnesses),
-  CompiledContract.withCompiledFileAssets(zkConfigPath),
+  CompiledContract.withCompiledFileAssets('./managed/void-ballot'),
 );
 
 export {
@@ -24,5 +19,3 @@ export {
   type ImpureCircuits,
   type PureCircuits,
 } from './managed/void-ballot/contract/index.js';
-export { voidBallotPrivateStateKey } from './constants.js';
-export { witnesses, createInitialPrivateState, type VoidBallotPrivateState } from './witnesses.js';
