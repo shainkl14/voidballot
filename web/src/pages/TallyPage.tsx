@@ -1,8 +1,8 @@
 import { motion, useReducedMotion } from 'motion/react';
-import type { ChamberState } from '../lib/voidballot';
+import type { ChamberState } from '@api/common-types.js';
 
 type Props = {
-  contractAddress: string | null;
+  contractAddress: string;
   chamber: ChamberState | null;
   onRefresh: () => Promise<void>;
 };
@@ -60,15 +60,9 @@ export function TallyPage({ contractAddress, chamber, onRefresh }: Props) {
         </button>
       </div>
 
-      {!contractAddress && (
-        <p className="mt-12 border border-line bg-ink p-8 text-mist">
-          Join or deploy a chamber from the Ballot desk to read tallies.
-        </p>
-      )}
-
-      {contractAddress && !chamber && (
+      {!chamber && (
         <p className="mt-12 animate-pulse font-mono text-sm text-mist">
-          Waiting for indexed chamber state…
+          Loading chamber state from indexer…
         </p>
       )}
 
@@ -99,7 +93,7 @@ export function TallyPage({ contractAddress, chamber, onRefresh }: Props) {
           <dl className="space-y-3 font-mono text-[12px] text-mist">
             <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
               <dt className="shrink-0 text-paper/70">Proposal hash</dt>
-              <dd className="break-all">{chamber.proposalHash}</dd>
+              <dd className="break-all">{chamber.proposalHash || '—'}</dd>
             </div>
             <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
               <dt className="shrink-0 text-paper/70">Contract</dt>

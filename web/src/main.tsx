@@ -1,3 +1,5 @@
+import './globals';
+import './config.js';
 import '@midnight-ntwrk/dapp-connector-api';
 import { createRoot } from 'react-dom/client';
 import App from './App';

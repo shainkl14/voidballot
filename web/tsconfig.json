@@ -11,8 +11,9 @@
     "strict": true,
     "noEmit": true,
     "paths": {
-      "@contracts/*": ["../contracts/*"]
+      "@contracts/*": ["../contracts/*"],
+      "@api/*": ["../api/src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "../api/src", "../contracts"]
 }

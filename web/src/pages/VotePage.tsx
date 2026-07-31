@@ -1,102 +1,71 @@
 import { useState } from 'react';
 import { CircleNotch, CheckCircle } from '@phosphor-icons/react';
-import type { ConnectedSession } from '../lib/midnight';
+import type { ChamberState, BallotChoice } from '@api/common-types.js';
 import {
-  CHOICE_LABELS,
-  castBallot,
-  deployChamber,
-  getNullifierPreview,
-  getOrCreateSecrets,
-  proveVoted,
-  type BallotChoice,
-  type ChamberState,
-} from '../lib/voidballot';
+  BrowserVoidBallotManager,
+  friendlyError,
+} from '../lib/BrowserVoidBallotManager';
+import { CHOICE_LABELS, CONTRACT_ADDRESS } from '../config';
 
 type Props = {
-  session: ConnectedSession | null;
-  contractAddress: string | null;
-  chamber: ChamberState | null;
+  connected: boolean;
   busy: boolean;
-  error: string | null;
-  onDeployed: (addr: string) => void;
-  onJoined: (addr: string) => void;
+  chamber: ChamberState | null;
+  nullifierPreview: string;
+  manager: BrowserVoidBallotManager;
   onBusy: (v: boolean) => void;
   onError: (e: string | null) => void;
+  onStatus: (s: string | null) => void;
   onRefresh: () => Promise<void>;
 };
 
 export function VotePage({
-  session,
-  contractAddress,
-  chamber,
+  connected,
   busy,
-  error,
-  onDeployed,
-  onJoined,
+  chamber,
+  nullifierPreview,
+  manager,
   onBusy,
   onError,
+  onStatus,
   onRefresh,
 }: Props) {
-  const [proposal, setProposal] = useState(
-    'Chamber Measure: Seal the void corridor by midnight.',
-  );
-  const [joinInput, setJoinInput] = useState('');
   const [choice, setChoice] = useState<BallotChoice>(0);
-  const secrets = getOrCreateSecrets();
-  const nullifierPreview = getNullifierPreview(secrets);
 
-  async function handleDeploy() {
-    if (!session) {
+  async function handleCast() {
+    if (!connected) {
       onError('Connect Lace or 1AM first.');
       return;
     }
     onBusy(true);
     onError(null);
+    onStatus(`Proving castBallot (${CHOICE_LABELS[choice]})…`);
     try {
-      const addr = await deployChamber(session, proposal);
-      onDeployed(addr);
+      await manager.castBallot(CONTRACT_ADDRESS, choice);
+      onStatus(`Ballot cast: ${CHOICE_LABELS[choice]}`);
       await onRefresh();
     } catch (e) {
-      onError(String(e));
-    } finally {
-      onBusy(false);
-    }
-  }
-
-  function handleJoin() {
-    const addr = joinInput.trim();
-    if (!/^[0-9a-fA-F]{64}$/.test(addr)) {
-      onError('Contract address must be 64 hex characters.');
-      return;
-    }
-    onJoined(addr);
-    setJoinInput('');
-    onError(null);
-  }
-
-  async function handleCast() {
-    if (!session || !contractAddress) return;
-    onBusy(true);
-    onError(null);
-    try {
-      await castBallot(session, contractAddress, choice);
-      await onRefresh();
-    } catch (e) {
-      onError(String(e));
+      onError(friendlyError(e));
+      onStatus(null);
     } finally {
       onBusy(false);
     }
   }
 
   async function handleProve() {
-    if (!session || !contractAddress) return;
+    if (!connected) {
+      onError('Connect Lace or 1AM first.');
+      return;
+    }
     onBusy(true);
     onError(null);
+    onStatus('Proving proveVoted…');
     try {
-      await proveVoted(session, contractAddress);
-      await onRefresh();
+      await manager.proveVoted(CONTRACT_ADDRESS);
+      onStatus('Vote proven — nullifier on-chain, wallet identity hidden.');
     } catch (e) {
-      onError(String(e));
+      onError(friendlyError(e));
+      onStatus(null);
     } finally {
       onBusy(false);
     }
@@ -106,61 +75,20 @@ export function VotePage({
     <div className="mx-auto max-w-[1100px] px-4 py-12 md:px-8 md:py-16">
       <h1 className="font-display text-4xl font-extrabold tracking-tight">Ballot desk</h1>
       <p className="mt-3 max-w-[55ch] text-mist">
-        Deploy a local chamber or join an existing address, then cast once from your nullifier.
+        Connect your wallet to join the preview chamber, then cast once from your nullifier.
       </p>
-
-      {error && (
-        <div className="mt-6 border border-ember/50 bg-ember/10 px-4 py-3 text-sm text-paper">
-          {error}
-        </div>
-      )}
 
       <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <section className="border border-line bg-ink p-6 md:p-8">
-          <h2 className="font-display text-xl font-bold">Deploy / join</h2>
-          <label className="mt-6 block">
-            <span className="mb-2 block text-sm text-mist">Proposal text</span>
-            <textarea
-              value={proposal}
-              onChange={(e) => setProposal(e.target.value)}
-              rows={3}
-              className="w-full border border-line bg-void px-3 py-2 text-sm text-paper outline-none focus:border-acid"
-            />
-          </label>
-          <button
-            type="button"
-            disabled={busy || !session}
-            onClick={() => void handleDeploy()}
-            className="mt-4 inline-flex items-center gap-2 bg-acid px-4 py-2.5 text-sm font-bold text-void transition hover:bg-acid-dim disabled:opacity-50 active:scale-[0.98]"
-          >
-            {busy ? <CircleNotch className="animate-spin" size={16} /> : null}
-            Deploy chamber
-          </button>
-
-          <div className="mt-8 border-t border-line pt-6">
-            <label className="block">
-              <span className="mb-2 block text-sm text-mist">Join contract (64 hex)</span>
-              <input
-                value={joinInput}
-                onChange={(e) => setJoinInput(e.target.value)}
-                placeholder="contract address"
-                className="w-full border border-line bg-void px-3 py-2 font-mono text-sm text-paper outline-none focus:border-acid"
-              />
-            </label>
-            <button
-              type="button"
-              onClick={handleJoin}
-              className="mt-3 border border-line px-4 py-2.5 text-sm font-medium text-paper transition hover:border-mist active:scale-[0.98]"
-            >
-              Join address
-            </button>
-          </div>
-
-          {contractAddress && (
-            <p className="mt-6 break-all font-mono text-[11px] text-mist">
-              Active: {contractAddress}
-            </p>
-          )}
+          <h2 className="font-display text-xl font-bold">Chamber</h2>
+          <p className="mt-4 font-mono text-[11px] text-mist break-all">
+            Contract: {CONTRACT_ADDRESS}
+          </p>
+          <p className="mt-4 text-sm text-mist">
+            {connected
+              ? 'Wallet connected and contract joined via findDeployedContract.'
+              : 'Use Connect in the nav to join this chamber.'}
+          </p>
         </section>
 
         <section className="border border-line bg-ink p-6 md:p-8">
@@ -189,15 +117,16 @@ export function VotePage({
           <div className="mt-6 flex flex-wrap gap-2">
             <button
               type="button"
-              disabled={busy || !session || !contractAddress}
+              disabled={busy || !connected}
               onClick={() => void handleCast()}
               className="inline-flex items-center gap-2 bg-acid px-4 py-2.5 text-sm font-bold text-void disabled:opacity-50 active:scale-[0.98]"
             >
+              {busy ? <CircleNotch className="animate-spin" size={16} /> : null}
               Cast {CHOICE_LABELS[choice]}
             </button>
             <button
               type="button"
-              disabled={busy || !session || !contractAddress}
+              disabled={busy || !connected}
               onClick={() => void handleProve()}
               className="inline-flex items-center gap-2 border border-line px-4 py-2.5 text-sm font-medium text-paper disabled:opacity-50 active:scale-[0.98]"
             >

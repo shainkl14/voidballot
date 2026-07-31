@@ -1,94 +1,113 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import pino from 'pino';
 import { SiteNav } from './components/SiteNav';
 import { LandingPage } from './pages/LandingPage';
 import { VotePage } from './pages/VotePage';
 import { TallyPage } from './pages/TallyPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import {
-  createConnectedSession,
-  detectWallet,
-  type ConnectedSession,
-} from './lib/midnight';
-import {
-  CONTRACT_STORAGE_KEY,
-  ZK_PATH,
-  fetchChamberState,
-  type ChamberState,
-} from './lib/voidballot';
-import { LOCAL_INDEXER, NETWORK_ID } from './lib/network';
+  BrowserVoidBallotManager,
+  friendlyError,
+  getOrCreateSecrets,
+  VoidBallotAPI,
+} from './lib/BrowserVoidBallotManager';
+import { CONTRACT_ADDRESS, INDEXER_URL, NETWORK_ID } from './config';
+import type { ChamberState } from '@api/common-types.js';
 
 export default function App() {
-  const [session, setSession] = useState<ConnectedSession | null>(null);
-  const [contractAddress, setContractAddress] = useState<string | null>(null);
+  const managerRef = useRef<BrowserVoidBallotManager | null>(null);
+  const [connected, setConnected] = useState(false);
+  const [unshieldedAddress, setUnshieldedAddress] = useState<string | null>(null);
   const [chamber, setChamber] = useState<ChamberState | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
 
-  useEffect(() => {
-    const stored = localStorage.getItem(CONTRACT_STORAGE_KEY);
-    if (stored) setContractAddress(stored);
+  const secrets = useMemo(() => getOrCreateSecrets(), []);
+  const nullifierPreview = useMemo(
+    () => VoidBallotAPI.nullifierPreview(secrets),
+    [secrets],
+  );
+
+  const getManager = useCallback(() => {
+    if (!managerRef.current) {
+      const logger = pino({ level: 'warn', browser: { asObject: true } });
+      managerRef.current = new BrowserVoidBallotManager(logger);
+    }
+    return managerRef.current;
   }, []);
 
   const refresh = useCallback(async () => {
-    if (!contractAddress) {
-      setChamber(null);
-      return;
-    }
-    const indexerUrl = session?.config.indexerUri ?? LOCAL_INDEXER;
     try {
-      const state = await fetchChamberState(indexerUrl, contractAddress);
+      const state = await VoidBallotAPI.fetchChamberState(
+        INDEXER_URL,
+        CONTRACT_ADDRESS,
+        NETWORK_ID,
+      );
       setChamber(state);
       setError(null);
     } catch (e) {
-      setError(String(e));
+      setError(friendlyError(e));
     }
-  }, [contractAddress, session]);
+  }, []);
 
   useEffect(() => {
     void refresh();
-    if (!contractAddress) return;
     const interval = setInterval(() => void refresh(), 15_000);
     return () => clearInterval(interval);
-  }, [refresh, contractAddress]);
+  }, [refresh]);
 
   async function onConnect() {
     setBusy(true);
     setError(null);
+    setStatus(null);
     try {
-      const wallet = await detectWallet();
-      const api = await wallet.connect(NETWORK_ID);
-      setSession(await createConnectedSession(api, ZK_PATH));
+      const manager = getManager();
+      const session = await manager.getSession();
+      await manager.join(CONTRACT_ADDRESS);
+      setUnshieldedAddress(session.unshieldedAddress);
+      setConnected(true);
+      setStatus(`Connected on ${NETWORK_ID} — joined contract via findDeployedContract`);
     } catch (e) {
-      setError(String(e));
+      setError(friendlyError(e));
     } finally {
       setBusy(false);
     }
   }
 
   async function onDisconnect() {
-    if (session?.api?.disconnect) await session.api.disconnect();
-    setSession(null);
-  }
-
-  function persistAddress(addr: string) {
-    setContractAddress(addr);
-    localStorage.setItem(CONTRACT_STORAGE_KEY, addr);
+    setBusy(true);
+    try {
+      await getManager().disconnect();
+    } catch {
+      // ignore disconnect errors
+    }
+    setConnected(false);
+    setUnshieldedAddress(null);
+    setStatus('Disconnected');
+    setBusy(false);
   }
 
   return (
     <BrowserRouter>
       <div className="min-h-[100dvh] bg-void text-paper">
         <SiteNav
-          connected={!!session}
-          address={session?.unshieldedAddress ?? null}
+          connected={connected}
+          address={unshieldedAddress}
           busy={busy}
           onConnect={() => void onConnect()}
           onDisconnect={() => void onDisconnect()}
         />
-        {error && (
-          <div className="border-b border-ember/40 bg-ember/10 px-4 py-2 text-center text-sm text-paper">
-            {error}
+        {(error || status) && (
+          <div
+            className={`border-b px-4 py-2 text-center text-sm ${
+              error
+                ? 'border-ember/40 bg-ember/10 text-paper'
+                : 'border-acid/30 bg-acid/10 text-paper'
+            }`}
+          >
+            {error ?? status}
           </div>
         )}
         <Routes>
@@ -97,15 +116,14 @@ export default function App() {
             path="/vote"
             element={
               <VotePage
-                session={session}
-                contractAddress={contractAddress}
-                chamber={chamber}
+                connected={connected}
                 busy={busy}
-                error={error}
-                onDeployed={persistAddress}
-                onJoined={persistAddress}
+                chamber={chamber}
+                nullifierPreview={nullifierPreview}
+                manager={getManager()}
                 onBusy={setBusy}
                 onError={setError}
+                onStatus={setStatus}
                 onRefresh={refresh}
               />
             }
@@ -114,7 +132,7 @@ export default function App() {
             path="/tally"
             element={
               <TallyPage
-                contractAddress={contractAddress}
+                contractAddress={CONTRACT_ADDRESS}
                 chamber={chamber}
                 onRefresh={refresh}
               />
@@ -123,7 +141,7 @@ export default function App() {
           <Route path="/privacy" element={<PrivacyPage />} />
         </Routes>
         <footer className="border-t border-line py-8 text-center font-mono text-[11px] text-mist">
-          VoidBallot on Midnight - anonymous ballots, public tallies
+          VoidBallot on Midnight — anonymous ballots, public tallies
         </footer>
       </div>
     </BrowserRouter>
