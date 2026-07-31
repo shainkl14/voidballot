@@ -1,8 +1,13 @@
+import { useEffect } from 'react';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import type { ChamberState } from '@api/common-types.js';
+import { chamberById, liveChamber } from '../lib/chambers';
+import { AdvancedDetails } from '../components/AdvancedDetails';
+import { useProgress } from '../components/ProgressProvider';
+import { CONTRACT_ADDRESS } from '../config';
 
 type Props = {
-  contractAddress: string;
   chamber: ChamberState | null;
   onRefresh: () => Promise<void>;
 };
@@ -28,45 +33,73 @@ function Bar({
           {value} <span className="text-paper/50">({pct}%)</span>
         </span>
       </div>
-      <div className="h-3 w-full bg-slate">
+      <div className="h-3 w-full bg-slate overflow-hidden">
         <motion.div
-          className="h-full"
+          className="h-full anim-tally-grow origin-left"
           style={{ background: accent }}
-          initial={reduce ? false : { width: 0 }}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          initial={reduce ? false : { scaleX: 0 }}
+          animate={{ scaleX: pct / 100 }}
+          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
         />
       </div>
     </div>
   );
 }
 
-export function TallyPage({ contractAddress, chamber, onRefresh }: Props) {
+export function TallyPage({ chamber, onRefresh }: Props) {
+  const { id } = useParams<{ id: string }>();
+  const floor = id ? chamberById(id) : liveChamber();
+  const { recordFloorVisit } = useProgress();
   const total = chamber?.totalBallots ?? 0;
+  const isLive = floor?.status === 'live';
+
+  useEffect(() => {
+    if (isLive) recordFloorVisit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [floor?.id]);
+
+  if (!floor) return <Navigate to="/floors" replace />;
 
   return (
     <div className="mx-auto max-w-[900px] px-4 py-12 md:px-8 md:py-16">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-extrabold tracking-tight">Tally board</h1>
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-acid">
+            {floor.status === 'sealed' ? 'Archive tally' : 'Live tally'}
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight">
+            {floor.title}
+          </h1>
           <p className="mt-3 text-mist">Public counters. No voter names.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => void onRefresh()}
-          className="border border-line px-4 py-2 text-sm text-paper transition hover:border-mist active:scale-[0.98]"
-        >
-          Refresh
-        </button>
+        <div className="flex flex-wrap gap-2">
+          {isLive ? (
+            <Link
+              to={`/floors/${floor.id}/vote`}
+              className="border border-acid px-4 py-2 text-sm font-bold text-acid transition hover:bg-acid hover:text-void active:scale-[0.98]"
+            >
+              Ballot desk
+            </Link>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => void onRefresh()}
+            className="border border-line px-4 py-2 text-sm text-paper transition hover:border-mist active:scale-[0.98]"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
 
-      {!chamber && (
-        <p className="mt-12 animate-pulse font-mono text-sm text-mist">
-          Loading chamber state from indexer…
-        </p>
-      )}
+      {!isLive && floor.status === 'upcoming' ? (
+        <p className="mt-12 text-mist">This floor hasn’t opened. No live counters yet.</p>
+      ) : null}
 
-      {chamber && (
+      {isLive && !chamber ? (
+        <p className="mt-12 animate-pulse text-sm text-mist">Loading the board…</p>
+      ) : null}
+
+      {(isLive || floor.status === 'sealed') && chamber ? (
         <div className="mt-12 space-y-10">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {[
@@ -90,18 +123,18 @@ export function TallyPage({ contractAddress, chamber, onRefresh }: Props) {
             <Bar label="Void" value={chamber.votesVoid} total={total} accent="#8b968f" />
           </div>
 
-          <dl className="space-y-3 font-mono text-[12px] text-mist">
-            <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
-              <dt className="shrink-0 text-paper/70">Proposal hash</dt>
-              <dd className="break-all">{chamber.proposalHash || '—'}</dd>
-            </div>
-            <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
-              <dt className="shrink-0 text-paper/70">Contract</dt>
-              <dd className="break-all">{contractAddress}</dd>
-            </div>
-          </dl>
+          <AdvancedDetails label="Technical details">
+            <p>Proposal hash: {chamber.proposalHash || '—'}</p>
+            <p>Contract: {CONTRACT_ADDRESS}</p>
+          </AdvancedDetails>
         </div>
-      )}
+      ) : null}
+
+      {floor.status === 'sealed' && !chamber ? (
+        <p className="mt-12 text-mist">
+          Archive floor — live indexer state unavailable. {floor.summary}
+        </p>
+      ) : null}
     </div>
   );
 }

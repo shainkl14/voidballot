@@ -208,20 +208,45 @@ export class BrowserVoidBallotManager {
 
 export function friendlyError(error: unknown): string {
   const msg = extractErrorMessage(error);
-  if (msg.includes('User rejected')) return 'Transaction cancelled.';
-  if (msg.includes('already voted')) return 'This nullifier has already cast a ballot.';
-  if (msg.includes('no ballot cast')) return 'No ballot found for your nullifier.';
-  if (msg.includes('No private state found')) {
-    return 'Private state was not initialized. Reconnect your wallet and try again.';
+  if (msg.includes('User rejected') || msg.includes('rejected by user')) {
+    return 'You cancelled in the wallet. Nothing was sealed.';
   }
-  if (msg.includes('Failed to fetch') || msg.includes('Failed Proof Server')) {
-    return 'Could not reach the proof server. Check wallet network settings and try again.';
+  if (msg.includes('already voted') || msg.includes('AlreadyVoted')) {
+    return 'This seat already cast a ballot. One seal per citizen.';
   }
-  if (msg.includes('not authorized')) return 'Wallet connection was rejected.';
+  if (msg.includes('no ballot cast') || msg.includes('NoBallot')) {
+    return 'No sealed ballot found for you yet. Seal a position first.';
+  }
+  if (msg.includes('No private state found') || msg.includes('private state')) {
+    return 'Your private seat wasn’t ready. Reconnect and try again.';
+  }
+  if (
+    msg.includes('Failed to fetch') ||
+    msg.includes('Failed Proof Server') ||
+    msg.includes('proof server')
+  ) {
+    return 'Couldn’t reach the proving service. Check wallet network settings and try again.';
+  }
+  if (msg.includes('No Midnight wallet') || msg.includes('wallet found')) {
+    return 'No Lace or 1AM wallet found. Install one, unlock it, and try again.';
+  }
+  if (msg.includes('not authorized') || msg.includes('Wallet not authorized')) {
+    return 'Wallet connection was declined.';
+  }
   if (msg.includes('insufficient') || msg.includes('DUST')) {
-    return 'Insufficient DUST. Fund your wallet from the preview faucet.';
+    return 'Not enough DUST to settle. Top up from the preview faucet.';
   }
-  return msg || 'Unexpected error — check the browser console.';
+  if (msg.includes('timeout') || msg.includes('Timeout')) {
+    return 'That took too long. Unlock your wallet and try again.';
+  }
+  if (msg.includes('findDeployedContract') || msg.includes('Contract not found')) {
+    return 'Couldn’t join the live floor. Check you’re on the right network.';
+  }
+  // Strip hex / circuit names if they dominate the message
+  if (/0x[a-fA-F0-9]{16,}/.test(msg) || /castBallot|proveVoted/.test(msg)) {
+    return 'Something went wrong sealing this action. Try again in a moment.';
+  }
+  return msg || 'Something went wrong. Try again in a moment.';
 }
 
 function extractErrorMessage(error: unknown): string {
